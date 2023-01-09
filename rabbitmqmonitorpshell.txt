@@ -1,0 +1,28 @@
+# Import the RabbitMQ management plugin
+Import-Module "C:\Program Files\RabbitMQ Server\rabbitmq_server-3.8.8\sbin\rabbitmq-plugins.bat"
+Enable-RabbitMqPlugin rabbitmq_management
+
+# Set the connection parameters
+$username = "guest"
+$password = "guest"
+$apiUrl = "http://localhost:15672/api"
+
+# Set the queue name
+$queueName = "my_queue"
+
+# Create the basic authentication header
+$basicAuth = ("{0}:{1}" -f $username, $password)
+$basicAuth = [System.Text.Encoding]::UTF8.GetBytes($basicAuth)
+$basicAuth = [System.Convert]::ToBase64String($basicAuth)
+$headers = @{Authorization=("Basic {0}" -f $basicAuth)}
+
+# Send a GET request to the RabbitMQ management API to retrieve the queue information
+$response = Invoke-WebRequest -Uri "$apiUrl/queues/$queueName" -Method Get -Headers $headers
+
+# Convert the response to a JSON object
+$queue = ConvertFrom-Json -InputObject $response.Content
+
+# Print the queue properties
+Write-Output "Name: $($queue.name)"
+Write-Output "Messages ready: $($queue.messages_ready)"
+Write-Output "Messages unacknowledged: $($queue.messages_unacknowledged)"

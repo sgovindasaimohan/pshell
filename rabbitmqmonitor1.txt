@@ -1,0 +1,22 @@
+#code to monitor the RabbitMQ queues
+
+import pika
+
+# Set the connection parameters to connect to the RabbitMQ server
+parameters = pika.ConnectionParameters(host='localhost')
+
+# Connect to the RabbitMQ server
+connection = pika.BlockingConnection(parameters)
+channel = connection.channel()
+
+# Declare the queue that you want to monitor
+queue_name = 'my_queue'
+result = channel.queue_declare(queue=queue_name, passive=True)
+
+# Print the queue information
+print("Queue name: {}".format(result.method.queue))
+print("Number of messages: {}".format(result.method.message_count))
+print("Number of consumers: {}".format(result.method.consumer_count))
+
+# Close the connection
+connection.close()

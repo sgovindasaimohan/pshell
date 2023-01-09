@@ -1,0 +1,17 @@
+# Import the RabbitMQ.Management.Client.PowerShell module
+Import-Module RabbitMQ.Management.Client.PowerShell
+
+# Connect to the RabbitMQ server
+Connect-RabbitMQ -HostName localhost
+
+# Get the list of queues on the server
+$queues = Get-RabbitMQQueue
+
+# Iterate through the queues and print the queue name and message count
+foreach ($queue in $queues) {
+  Write-Host "Queue: $($queue.Name)"
+  Write-Host "Number of messages: $($queue.Messages)"
+}
+
+# Disconnect from the RabbitMQ server
+Disconnect-RabbitMQ

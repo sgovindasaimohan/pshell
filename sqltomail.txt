@@ -1,0 +1,7 @@
+$query = "SELECT * FROM dbo.YourTable"
+$results = Invoke-Sqlcmd -Query $query -ServerInstance "YourServer\YourInstance" -Database "YourDatabase"
+$body = $results | ConvertTo-Csv -NoTypeInformation
+$email = "recipient@example.com"
+$subject = "SQL Query Results"
+$smtp = "smtp.example.com"
+Send-MailMessage -To $email -Subject $subject -Body $body -SmtpServer $smtp

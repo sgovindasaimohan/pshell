@@ -1,0 +1,30 @@
+$folderA = 'D:\folder 1'
+$folderB = 'D:\folder 2'
+
+# Get the list of files in folder-A
+$filesA = Get-ChildItem -Path $folderA -File
+
+# Iterate over the list of files in folder-A
+foreach ($fileA in $filesA) {
+    # Get the corresponding file in folder-B
+    $fileB = (Get-ChildItem -Path $folderB -File -Filter $fileA.Name)
+    if ($fileB -ne $null) {
+        # Get the contents of both files
+        $contentsA = Get-Content $fileA.FullName
+        $contentsB = Get-Content $fileB.FullName
+        
+        $diff = Compare-Object -ReferenceObject $contentsA -DifferenceObject $contentsB -IncludeEqual
+        $line_number = 1
+        $diff | ForEach-Object {
+            if ($_.SideIndicator -eq "<=") {
+                $line_number++
+                Write-Output "File $($fileA.Name) - Line $line_number - $($_.InputObject)"  
+            } else {
+                $line_number++
+            }
+        }
+    } 
+    else {
+        Write-Output "File $($fileA.Name) doesn't exists in Folder B"
+    }
+}

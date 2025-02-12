@@ -1,49 +1,35 @@
 // C#
 using System;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+using SlackNet;
+using SlackNet.Events;
+using SlackNet.SocketMode;
 
 class Program
 {
-    private static readonly HttpClient client = new HttpClient();
-
     static async Task Main(string[] args)
     {
-        string botToken = "xoxb-your-bot-token";
-        string appToken = "xapp-your-app-token"; // Typically used for Socket Mode, not needed here
-        string channelId = "your-channel-id";
+        string appToken = "xapp-your-app-token"; // Your app-level token
+        string botToken = "xoxb-your-bot-token"; // Your bot token
 
-        // Listen for messages (this is a placeholder for actual message listening logic)
-        string incomingMessage = "Hello"; // Simulated incoming message
+        var slackSocketModeClient = new SlackSocketModeClient(appToken, botToken);
 
-        if (incomingMessage.Equals("Hello", StringComparison.OrdinalIgnoreCase))
+        slackSocketModeClient.OnEvent<MessageEvent>(async message =>
         {
-            await SendMessageToSlack(channelId, "Hello", botToken);
-        }
-    }
+            if (message.Text.Equals("Hello", StringComparison.OrdinalIgnoreCase))
+            {
+                await slackSocketModeClient.Chat.PostMessage(new Message
+                {
+                    Channel = message.Channel,
+                    Text = "Hello"
+                });
+            }
+        });
 
-    static async Task SendMessageToSlack(string channelId, string message, string token)
-    {
-        var payload = new JObject
-        {
-            { "channel", channelId },
-            { "text", message }
-        };
+        await slackSocketModeClient.Connect();
+        Console.WriteLine("Connected to Slack via Socket Mode. Listening for messages...");
 
-        var requestContent = new StringContent(payload.ToString(), Encoding.UTF8, "application/json");
-        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-        HttpResponseMessage response = await client.PostAsync("https://slack.com/api/chat.postMessage", requestContent);
-
-        if (response.IsSuccessStatusCode)
-        {
-            Console.WriteLine("Message sent successfully!");
-        }
-        else
-        {
-            Console.WriteLine($"Failed to send message. Status code: {response.StatusCode}");
-        }
+        // Keep the application running
+        await Task.Delay(-1);
     }
 }
